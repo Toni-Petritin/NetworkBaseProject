@@ -4,8 +4,9 @@ public class Tile : MonoBehaviour
 {
     public int x, y;
     
-    public PlayerEnum owner;
-    public bool hasBuilding;
+    private PlayerEnum owner;
+    private bool hasBuilding;
+    private bool currentlySelected;
     
     public void SetOwner()
     {
@@ -16,4 +17,17 @@ public class Tile : MonoBehaviour
     {
         
     }
+
+    public void Select(bool selected)
+    {
+        if (selected)
+        {
+            GetComponent<MeshRenderer>().material.color = Color.black;
+        }
+        else
+        {
+            GetComponent<MeshRenderer>().material.color = Color.white;
+        }
+    }
+    
 }

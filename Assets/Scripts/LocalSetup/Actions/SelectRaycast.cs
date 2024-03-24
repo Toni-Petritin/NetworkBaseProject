@@ -6,6 +6,8 @@ public class SelectRaycast : MonoBehaviour
 {
     void Update()
     {
+        // TODO: Shift + LMB should select a second tile.
+        
         if (Input.GetMouseButtonDown(0)) // Left mouse button
         {
             // Cast a ray from the mouse position into the scene
@@ -17,10 +19,11 @@ public class SelectRaycast : MonoBehaviour
             {
                 Tile tile = hit.collider.gameObject.GetComponent<Tile>();
                 
+                BoardSetup.Instance.SelectTiles(tile.x, tile.y);
                 
-                // Do something with the selected object
                 Debug.Log("Selected Tile: (" + tile.x + "," + tile.y + ")");
             }
         }
+        
     }
 }

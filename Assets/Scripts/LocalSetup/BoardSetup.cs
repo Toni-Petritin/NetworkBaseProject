@@ -50,4 +50,30 @@ public class BoardSetup : MonoBehaviour
             }
         }
     }
+
+    public void SelectTiles(int originX, int originY)
+    {
+        for(int x = 0; x < width; x++)
+        {
+            for( int y = 0; y < height; y++)
+            {
+                _tiles[x, y].Select(false);
+            }
+        }
+        
+        _tiles[originX,originY].Select(true);
+    }
+    
+    public void SelectTiles(int originX, int originY, int radiusX, int radiusY)
+    {
+        for(int x = 0; x < width; x++)
+        {
+            for( int y = 0; y < height; y++)
+            {
+                _tiles[x, y].Select(false);
+            }
+        }
+        
+        _tiles[originX,originY].Select(true);
+    }
 }
