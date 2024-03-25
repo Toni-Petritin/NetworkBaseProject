@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class BoardSetup : MonoBehaviour
@@ -17,6 +18,8 @@ public class BoardSetup : MonoBehaviour
     [SerializeField] private GameObject tileObject;
 
     Tile[,] _tiles = new Tile[width, height];
+
+    private List<Tile> _selectionList = new();
 
     private void Awake()
     {
@@ -53,27 +56,23 @@ public class BoardSetup : MonoBehaviour
 
     public void SelectTiles(int originX, int originY)
     {
-        for(int x = 0; x < width; x++)
+        foreach(Tile tile in _selectionList)
         {
-            for( int y = 0; y < height; y++)
-            {
-                _tiles[x, y].Select(false);
-            }
+            tile.Select(false);
         }
-        
+        _selectionList.Clear();
+        _selectionList.Add(_tiles[originX, originY]);
         _tiles[originX,originY].Select(true);
     }
     
     public void SelectTiles(int originX, int originY, int radiusX, int radiusY)
     {
-        for(int x = 0; x < width; x++)
+        foreach (Tile tile in _selectionList)
         {
-            for( int y = 0; y < height; y++)
-            {
-                _tiles[x, y].Select(false);
-            }
+            tile.Select(false);
         }
-        
+        _selectionList.Clear();
+
         _tiles[originX,originY].Select(true);
     }
 }
