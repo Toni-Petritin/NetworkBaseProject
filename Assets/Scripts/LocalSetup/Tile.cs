@@ -3,6 +3,8 @@ using UnityEngine;
 public class Tile : MonoBehaviour
 {
     public int x, y;
+
+    public int cost = 1;
     
     private PlayerEnum owner;
     private bool hasBuilding;
