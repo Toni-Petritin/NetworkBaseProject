@@ -30,14 +30,14 @@ public class SelectRaycast : MonoBehaviour
                 
                 textMeshProUGUI.text = "Cost: " + BoardSetup.Instance.GetSelectionCost();
             }
-            else
-            {
-                BoardSetup.Instance.UndoSelection();
-                selX = -1;
-                selY = -1;
+            //else
+            //{
+            //    BoardSetup.Instance.UndoSelection();
+            //    selX = -1;
+            //    selY = -1;
                 
-                textMeshProUGUI.text = "Cost: " + BoardSetup.Instance.GetSelectionCost();
-            }
+            //    textMeshProUGUI.text = "Cost: " + BoardSetup.Instance.GetSelectionCost();
+            //}
         }
         
         if (Input.GetMouseButtonDown(1)) // Right mouse button
@@ -53,6 +53,14 @@ public class SelectRaycast : MonoBehaviour
                 
                 BoardSetup.Instance.SelectTiles(selX, selY, tile.x, tile.y);
                 
+                textMeshProUGUI.text = "Cost: " + BoardSetup.Instance.GetSelectionCost();
+            }
+            else
+            {
+                BoardSetup.Instance.UndoSelection();
+                selX = -1;
+                selY = -1;
+
                 textMeshProUGUI.text = "Cost: " + BoardSetup.Instance.GetSelectionCost();
             }
         }

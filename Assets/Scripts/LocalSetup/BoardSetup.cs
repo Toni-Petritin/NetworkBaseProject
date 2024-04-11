@@ -105,4 +105,24 @@ public class BoardSetup : MonoBehaviour
         
         return sum;
     }
+
+    public void BuySelection()
+    {
+        int number = 0;
+        foreach (Tile tile in selectionList)
+        {
+            number++;
+        }
+        Debug.Log("Bought " + number + " tiles.");
+    }
+
+    public void BuildOnSelection()
+    {
+        int number = 0;
+        foreach (Tile tile in selectionList)
+        {
+            number++;
+        }
+        Debug.Log("Built on " + number + " tiles.");
+    }
 }
