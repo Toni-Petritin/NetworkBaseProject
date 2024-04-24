@@ -1,7 +1,5 @@
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 public class BoardSetup : MonoBehaviour
 {
@@ -121,6 +119,7 @@ public class BoardSetup : MonoBehaviour
         int number = 0;
         foreach (Tile tile in selectionList)
         {
+            tile.SetBuilding(true);
             number++;
         }
         Debug.Log("Built on " + number + " tiles.");

@@ -10,11 +10,11 @@ public class RpcTest : NetworkBehaviour
         if (!IsServer && IsOwner) //Only send an RPC to the server on the client that owns the NetworkObject that owns this NetworkBehaviour instance
         {
             // Lightsail server endpoint
-            string serverURL = "51.20.125.76";
-            StartCoroutine(SendRequestCoroutine(serverURL));
+            // string serverURL = "51.20.125.76";
+            // StartCoroutine(SendRequestCoroutine(serverURL));
             
             // Original code:
-            // TestServerRpc(0, NetworkObjectId);
+            TestServerRpc(0, NetworkObjectId);
         }
     }
     
