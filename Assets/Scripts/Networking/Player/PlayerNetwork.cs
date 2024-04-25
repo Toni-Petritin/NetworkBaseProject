@@ -1,8 +1,5 @@
-using System;
 using System.Collections.Generic;
-using TMPro;
 using Unity.Netcode;
-using UnityEngine;
 
 public class PlayerNetwork : NetworkBehaviour
 {
@@ -22,10 +19,16 @@ public class PlayerNetwork : NetworkBehaviour
         }
     }
 
-    // Method to assign a color to a player
-    private void AssignPlayerColor(ulong clientId)
+    [ServerRpc(RequireOwnership = false)]
+    //private void AssignPlayerColor(ulong clientId)
+    public void MyGlobalServerRpc(ServerRpcParams serverRpcParams = default)
     {
-        // Set unique PlayerEnum to match player.
+        var clientId = serverRpcParams.Receive.SenderClientId;
+        if (NetworkManager.ConnectedClients.ContainsKey(clientId))
+        {
+            var client = NetworkManager.ConnectedClients[clientId];
+            // Do things for this client. Like set playerEnum.
+        }
     }
 
     private void Update()
@@ -47,14 +50,14 @@ public class PlayerNetwork : NetworkBehaviour
     public void BuyTerritory(short originX, short originY, short radX, short radY)
     {
         // IsServer checks price and sets up sale with timer.
-        // IsOwner asks to buy.
+        // IsOwner asks to buy. Makes an rpc request.
         // !IsOwner gets informed of sale.
     }
 
     public void BuyBuildings(short originX, short originY, short radX, short radY)
     {
         // IsServer checks price and sets up sale with timer.
-        // IsOwner asks to buy.
+        // IsOwner asks to buy. Mkes an rpc request.
         // !IsOwner gets informed of sale.
     }
 
