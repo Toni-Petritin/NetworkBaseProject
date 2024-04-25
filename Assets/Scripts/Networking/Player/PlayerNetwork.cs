@@ -4,9 +4,10 @@ using Unity.Netcode;
 public class PlayerNetwork : NetworkBehaviour
 {
     public NetworkVariable<int> PlayerMoney = new NetworkVariable<int>();
-    private Dictionary<ulong, PlayerEnum> playerColors = new Dictionary<ulong, PlayerEnum>();
     public NetworkVariable<PlayerEnum> playerEnum = new NetworkVariable<PlayerEnum>();
-    
+
+    private Dictionary<ulong, PlayerEnum> playerColors = new Dictionary<ulong, PlayerEnum>();
+
     void Start()
     {
         if (IsServer)
