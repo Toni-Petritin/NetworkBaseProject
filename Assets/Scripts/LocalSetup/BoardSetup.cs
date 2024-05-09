@@ -10,7 +10,7 @@ public class BoardSetup : MonoBehaviour
     private const int width = 100;
     private const int height = 100;
     
-    private short selX = -1, selY = -1, radX = -1, radY = -1;
+    private int selX = -1, selY = -1, radX = -1, radY = -1;
     [SerializeField] private TextMeshProUGUI costText;
     [SerializeField] private TextMeshProUGUI currMoneyText;
     
@@ -28,10 +28,10 @@ public class BoardSetup : MonoBehaviour
     private List<Tile> selectionList = new();
     private List<Tile> actionSelectionList = new();
 
-    public bool gameStarted = true;
+    public bool gameStarted = false;
 
     public int money = 0;
-    public PlayerEnum playerEnum;
+    //public PlayerEnum playerEnum;
     
     private void Awake()
     {
@@ -64,6 +64,8 @@ public class BoardSetup : MonoBehaviour
                 _tiles[x, y].y = y;
             }
         }
+
+        //playerEnum = PlayerEnum.Neutral;
     }
     
     void Update()
@@ -82,10 +84,10 @@ public class BoardSetup : MonoBehaviour
                 Tile tile = hit.collider.gameObject.GetComponent<Tile>();
                 
                 SelectTiles(tile.x, tile.y);
-                selX = (short)tile.x;
-                selY = (short)tile.y;
+                selX = tile.x;
+                selY = tile.y;
                 
-                costText.text = "Cost: " + GetSelectionCost(playerEnum);
+                costText.text = "Cost: \n" + GetSelectionCost() + "/" + GetBuildCost();
             }
             //else
             //{
@@ -107,26 +109,30 @@ public class BoardSetup : MonoBehaviour
             if (Physics.Raycast(ray, out hit) && selX != -1 && selY != -1)
             {
                 Tile tile = hit.collider.gameObject.GetComponent<Tile>();
+                radX = tile.x;
+                radY = tile.y;
                 
-                SelectTiles(selX, selY, tile.x, tile.y);
+                SelectTiles(selX, selY, radX, radY);
                 
-                costText.text = "Cost: " + GetSelectionCost(playerEnum);
+                costText.text = "Cost: \n" + GetSelectionCost() + "/" + GetBuildCost();
             }
             else
             {
                 UndoSelection();
                 selX = -1;
                 selY = -1;
+                radX = -1;
+                radY = -1;
 
-                costText.text = "Cost: " + GetSelectionCost(playerEnum);
+                costText.text = "Cost: \n" + GetSelectionCost() + "/" + GetBuildCost();
             }
         }
     }
 
-    public void SetPlayer(PlayerEnum player)
-    {
-        playerEnum = player;
-    }
+    // public void SetPlayer(PlayerEnum player)
+    // {
+    //     playerEnum = player;
+    // }
     
     public void SelectTiles(int originX, int originY)
     {
@@ -162,6 +168,7 @@ public class BoardSetup : MonoBehaviour
     // For normal selection.
     public void UndoSelection()
     {
+        costText.text = "Cost: \n" + 0 + "/" + 0;
         foreach (Tile tile in selectionList)
         {
             tile.Select(false);
@@ -196,6 +203,21 @@ public class BoardSetup : MonoBehaviour
     {
         actionSelectionList.Clear();
     }
+
+    private int GetSelectionCost()
+    {
+        var playerObject = NetworkManager.Singleton.SpawnManager.GetLocalPlayerObject();
+        var player = playerObject.GetComponent<PlayerNetworkObject>();
+        PlayerEnum playerEnum = player.playerEnum.Value;
+        
+        int costSum = 0;
+        foreach (Tile tile in selectionList)
+        {
+            costSum += tile.CostToPlayer(playerEnum);
+        }
+        
+        return costSum;
+    }
     
     public int GetSelectionCost(PlayerEnum player)
     {
@@ -219,6 +241,24 @@ public class BoardSetup : MonoBehaviour
         return costSum;
     }
 
+    private int GetBuildCost()
+    {
+        var playerObject = NetworkManager.Singleton.SpawnManager.GetLocalPlayerObject();
+        var player = playerObject.GetComponent<PlayerNetworkObject>();
+        PlayerEnum playerEnum = player.playerEnum.Value;
+        
+        int number = 0;
+        foreach (Tile tile in selectionList)
+        {
+            if (tile.IsBuildableForPlayer(playerEnum))
+            {
+                number++;
+            }
+        }
+        number *= 10;
+        return number;
+    }
+    
     public int GetBuildCost(PlayerEnum player)
     {
         int number = 0;
@@ -249,6 +289,11 @@ public class BoardSetup : MonoBehaviour
 
     public void BuyButton()
     {
+        if (selX < 0 || selY < 0 || radX < 0 || radY < 0)
+        {
+            return;
+        }
+        
         if (NetworkManager.Singleton.IsClient)
         {
             var playerObject = NetworkManager.Singleton.SpawnManager.GetLocalPlayerObject();
@@ -259,6 +304,11 @@ public class BoardSetup : MonoBehaviour
     
     public void BuildButton()
     {
+        if (selX < 0 || selY < 0 || radX < 0 || radY < 0)
+        {
+            return;
+        }
+
         if (NetworkManager.Singleton.IsClient)
         {
             var playerObject = NetworkManager.Singleton.SpawnManager.GetLocalPlayerObject();

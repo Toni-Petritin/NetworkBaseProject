@@ -5,7 +5,7 @@ public class Tile : MonoBehaviour
 {
     public int x, y;
 
-    public int cost = 1;
+    public int cost = 2;
     
     public PlayerEnum Owner { get; private set; }
     public bool HasBuilding { get; private set; } = false;
@@ -17,7 +17,10 @@ public class Tile : MonoBehaviour
     
     private void Awake()
     {
+        Owner = PlayerEnum.Neutral;
         rend = GetComponent<Renderer>();
+        currColor = Color.white;
+        cost = 2;
     }
 
     public int SetOwner(PlayerEnum value)
@@ -26,7 +29,8 @@ public class Tile : MonoBehaviour
         {
             return 0;
         }
-        
+
+        Owner = value;
         if (value == PlayerEnum.Neutral)
         {
             rend.material.color = Color.white;
@@ -63,7 +67,7 @@ public class Tile : MonoBehaviour
         }
         else
         {
-            cost = 1;
+            cost = 2;
         }
         
         HasBuilding = value;

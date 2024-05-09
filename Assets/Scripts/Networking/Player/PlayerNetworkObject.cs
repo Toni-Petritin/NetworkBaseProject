@@ -7,7 +7,7 @@ public class PlayerNetworkObject : NetworkBehaviour
     public NetworkVariable<int> PlayerMoney = new NetworkVariable<int>();
     public NetworkVariable<PlayerEnum> playerEnum = new NetworkVariable<PlayerEnum>();
 
-    private Dictionary<ulong, PlayerEnum> playerColors = new Dictionary<ulong, PlayerEnum>();
+    //private Dictionary<ulong, PlayerEnum> playerColors = new Dictionary<ulong, PlayerEnum>();
 
     public bool playerReadied = false;
 
@@ -29,24 +29,25 @@ public class PlayerNetworkObject : NetworkBehaviour
     {
         BoardSetup.Instance.gameStarted = true;
         playerEnum.Value = (PlayerEnum)value;
+        //BoardSetup.Instance.SetPlayer((PlayerEnum)value);
     }
-
+    
     public void ImReadyToStartGame()
     {
         playerReadied = true;
     }
     
-    [ServerRpc(RequireOwnership = false)]
-    //private void AssignPlayerColor(ulong clientId)
-    public void MyGlobalServerRpc(ServerRpcParams serverRpcParams = default)
-    {
-        var clientId = serverRpcParams.Receive.SenderClientId;
-        if (NetworkManager.ConnectedClients.ContainsKey(clientId))
-        {
-            var client = NetworkManager.ConnectedClients[clientId];
-            // Do things for this client. Like set playerEnum.
-        }
-    }
+    // [ServerRpc(RequireOwnership = false)]
+    // //private void AssignPlayerColor(ulong clientId)
+    // public void MyGlobalServerRpc(ServerRpcParams serverRpcParams = default)
+    // {
+    //     var clientId = serverRpcParams.Receive.SenderClientId;
+    //     if (NetworkManager.ConnectedClients.ContainsKey(clientId))
+    //     {
+    //         var client = NetworkManager.ConnectedClients[clientId];
+    //         // Do things for this client. Like set playerEnum.
+    //     }
+    // }
 
     private void Update()
     {
@@ -65,20 +66,20 @@ public class PlayerNetworkObject : NetworkBehaviour
         }
     }
 
-    public void BuyTerritory(short originX, short originY, short radX, short radY)
+    public void BuyTerritory(int originX, int originY, int radX, int radY)
     {
         if (IsOwner)
         {
-            SubmitBuyRequestServerRpc(originX, originY, radX, radY);
+            SubmitBuyRequestServerRpc(playerEnum.Value, originX, originY, radX, radY);
         }
     }
 
     [Rpc(SendTo.Server)]
-    void SubmitBuyRequestServerRpc(short originX, short originY, short radX, short radY)
+    void SubmitBuyRequestServerRpc(PlayerEnum player, int originX, int originY, int radX, int radY)
     {
         //BoardSetup.Instance.SetPlayer(playerEnum.Value);
         BoardSetup.Instance.SelectActionTiles(originX, originY, radX, radY);
-        int cost = BoardSetup.Instance.GetBuildCost(playerEnum.Value);
+        int cost = BoardSetup.Instance.GetSelectionCost(playerEnum.Value);
         if (cost <= PlayerMoney.Value)
         {
             BoardSetup.Instance.BuySelection(playerEnum.Value);
@@ -88,39 +89,39 @@ public class PlayerNetworkObject : NetworkBehaviour
         BoardSetup.Instance.UndoActionSelection();
     }
     
-    [ClientRpc]
-    void SubmitBuyRequestClientRpc(PlayerEnum player, short originX, short originY, short radX, short radY)
+    [Rpc(SendTo.NotServer)]
+    void SubmitBuyRequestClientRpc(PlayerEnum player, int originX, int originY, int radX, int radY)
     {
         BoardSetup.Instance.SelectActionTiles(originX, originY, radX, radY);
         BoardSetup.Instance.BuySelection(player);
         BoardSetup.Instance.UndoActionSelection();
     }
     
-    public void BuyBuildings(short originX, short originY, short radX, short radY)
+    public void BuyBuildings(int originX, int originY, int radX, int radY)
     {
         if (IsOwner)
         {
-            SubmitBuildRequestServerRpc(originX, originY, radX, radY);
+            SubmitBuildRequestServerRpc(playerEnum.Value, originX, originY, radX, radY);
         }
     }
     
     [Rpc(SendTo.Server)]
-    void SubmitBuildRequestServerRpc(short originX, short originY, short radX, short radY)
+    void SubmitBuildRequestServerRpc(PlayerEnum player, int originX, int originY, int radX, int radY)
     {
         //BoardSetup.Instance.SetPlayer(playerEnum.Value);
         BoardSetup.Instance.SelectActionTiles(originX, originY, radX, radY);
-        int cost = BoardSetup.Instance.GetBuildCost(playerEnum.Value);
+        int cost = BoardSetup.Instance.GetBuildCost(player);
         if (cost <= PlayerMoney.Value)
         {
-            BoardSetup.Instance.BuildOnSelection(playerEnum.Value);
+            BoardSetup.Instance.BuildOnSelection(player);
             PlayerMoney.Value -= cost;
-            SubmitBuildRequestClientRpc(playerEnum.Value, originX, originY, radX, radY);
+            SubmitBuildRequestClientRpc(player, originX, originY, radX, radY);
         }
         BoardSetup.Instance.UndoActionSelection();
     }
 
-    [ClientRpc]
-    void SubmitBuildRequestClientRpc(PlayerEnum player, short originX, short originY, short radX, short radY)
+    [Rpc(SendTo.NotServer)]
+    void SubmitBuildRequestClientRpc(PlayerEnum player, int originX, int originY, int radX, int radY)
     {
         BoardSetup.Instance.SelectActionTiles(originX, originY, radX, radY);
         BoardSetup.Instance.BuildOnSelection(player);

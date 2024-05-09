@@ -12,10 +12,14 @@ public class GameStartManager : MonoBehaviour
         {
             StartButtons();
         }
-        else if (readyUIOn)
+        else if (readyUIOn && NetworkManager.Singleton.IsServer)
         {
             StatusLabels();
             StartGame();
+        }
+        else
+        {
+            StatusLabels();
         }
 
         GUILayout.EndArea();
@@ -45,22 +49,28 @@ public class GameStartManager : MonoBehaviour
             {
                 bool playersReady = true;
                 int playerEnum = 1;
+                // foreach (ulong uid in NetworkManager.Singleton.ConnectedClientsIds)
+                // {
+                //     if (!NetworkManager.Singleton.SpawnManager.GetPlayerNetworkObject(uid).GetComponent<PlayerNetworkObject>().playerReadied)
+                //     {
+                //         playersReady = false;
+                //     }
+                //     
+                // }
+                // if (playersReady)
+                // {
+                //     readyUIOn = false;
+                //     foreach (ulong uid in NetworkManager.Singleton.ConnectedClientsIds)
+                //     {
+                //         NetworkManager.Singleton.SpawnManager.GetPlayerNetworkObject(uid).GetComponent<PlayerNetworkObject>().ServerStartedGame(playerEnum);
+                //         playerEnum++;
+                //     }
+                // }
+                readyUIOn = false;
                 foreach (ulong uid in NetworkManager.Singleton.ConnectedClientsIds)
                 {
-                    if (!NetworkManager.Singleton.SpawnManager.GetPlayerNetworkObject(uid).GetComponent<PlayerNetworkObject>().playerReadied)
-                    {
-                        playersReady = false;
-                    }
-                    
-                }
-                if (playersReady)
-                {
-                    readyUIOn = false;
-                    foreach (ulong uid in NetworkManager.Singleton.ConnectedClientsIds)
-                    {
-                        NetworkManager.Singleton.SpawnManager.GetPlayerNetworkObject(uid).GetComponent<PlayerNetworkObject>().ServerStartedGame(playerEnum);
-                        playerEnum++;
-                    }
+                    NetworkManager.Singleton.SpawnManager.GetPlayerNetworkObject(uid).GetComponent<PlayerNetworkObject>().ServerStartedGame(playerEnum);
+                    playerEnum++;
                 }
             }
             else
@@ -68,6 +78,7 @@ public class GameStartManager : MonoBehaviour
                 var playerObject = NetworkManager.Singleton.SpawnManager.GetLocalPlayerObject();
                 var player = playerObject.GetComponent<PlayerNetworkObject>();
                 player.ImReadyToStartGame();
+                readyUIOn = false;
             }
         }
     }
