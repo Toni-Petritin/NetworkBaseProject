@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using TMPro;
+using Unity.Netcode;
 using UnityEngine;
 
 public class BoardSetup : MonoBehaviour
@@ -28,6 +29,7 @@ public class BoardSetup : MonoBehaviour
     public bool gameStarted = true;
 
     public int money = 0;
+    public PlayerEnum playerEnum;
     
     private void Awake()
     {
@@ -80,7 +82,7 @@ public class BoardSetup : MonoBehaviour
                 selX = tile.x;
                 selY = tile.y;
                 
-                costText.text = "Cost: " + GetSelectionCost();
+                costText.text = "Cost: " + GetSelectionCost(playerEnum);
             }
             //else
             //{
@@ -105,7 +107,7 @@ public class BoardSetup : MonoBehaviour
                 
                 SelectTiles(selX, selY, tile.x, tile.y);
                 
-                costText.text = "Cost: " + GetSelectionCost();
+                costText.text = "Cost: " + GetSelectionCost(playerEnum);
             }
             else
             {
@@ -113,9 +115,14 @@ public class BoardSetup : MonoBehaviour
                 selX = -1;
                 selY = -1;
 
-                costText.text = "Cost: " + GetSelectionCost();
+                costText.text = "Cost: " + GetSelectionCost(playerEnum);
             }
         }
+    }
+
+    public void SetPlayer(PlayerEnum player)
+    {
+        playerEnum = player;
     }
     
     public void SelectTiles(int originX, int originY)
@@ -157,15 +164,15 @@ public class BoardSetup : MonoBehaviour
         selectionList.Clear();
     }
 
-    public int GetSelectionCost()
+    public int GetSelectionCost(PlayerEnum player)
     {
-        int sum = 0;
+        int costSum = 0;
         foreach (Tile tile in selectionList)
         {
-            sum += tile.cost;
+            costSum += tile.CostToPlayer(player);
         }
         
-        return sum;
+        return costSum;
     }
 
     public int BuySelection(PlayerEnum player)
@@ -179,7 +186,21 @@ public class BoardSetup : MonoBehaviour
         return costSum;
     }
 
-    public void BuildOnSelection(PlayerEnum player)
+    public int GetBuildCost(PlayerEnum player)
+    {
+        int number = 0;
+        foreach (Tile tile in selectionList)
+        {
+            if (tile.IsBuildableForPlayer(player))
+            {
+                number++;
+            }
+        }
+        number *= 10;
+        return number;
+    }
+    
+    public int BuildOnSelection(PlayerEnum player)
     {
         int number = 0;
         foreach (Tile tile in selectionList)
@@ -189,5 +210,11 @@ public class BoardSetup : MonoBehaviour
                 number++;
             }
         }
+        number *= 10;
+        return number;
     }
+    // NetworkManager.Singleton.IsClient
+    // var playerObject = NetworkManager.Singleton.SpawnManager.GetLocalPlayerObject();
+    // var player = playerObject.GetComponent<HelloWorldPlayer>();
+    // player.Move();
 }

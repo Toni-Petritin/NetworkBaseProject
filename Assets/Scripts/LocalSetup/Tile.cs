@@ -11,8 +11,9 @@ public class Tile : MonoBehaviour
     public bool HasBuilding { get; private set; } = false;
     private bool currentlySelected;
     [SerializeField] private GameObject building;
-
+    
     private Renderer rend;
+    private Color currColor;
     
     private void Awake()
     {
@@ -29,18 +30,22 @@ public class Tile : MonoBehaviour
         if (value == PlayerEnum.Neutral)
         {
             rend.material.color = Color.white;
+            currColor = Color.white;
         }
         else if (value == PlayerEnum.Player1)
         {
             rend.material.color = Color.blue;
+            currColor = Color.blue;
         }
         else if (value == PlayerEnum.Player2)
         {
             rend.material.color = Color.red;
+            currColor = Color.red;
         }
         else if (value == PlayerEnum.Player3)
         {
             rend.material.color = Color.green;
+            currColor = Color.green;
         }
         return cost;
     }
@@ -74,8 +79,26 @@ public class Tile : MonoBehaviour
         }
         else
         {
-            GetComponent<MeshRenderer>().material.color = Color.white;
+            GetComponent<MeshRenderer>().material.color = currColor;
         }
     }
-    
+
+    public int CostToPlayer(PlayerEnum player)
+    {
+        if (player != Owner)
+        {
+            return cost;
+        }
+
+        return 0;
+    }
+
+    public bool IsBuildableForPlayer(PlayerEnum player)
+    {
+        if (player == Owner && !HasBuilding)
+        {
+            return true;
+        }
+        return false;
+    }
 }

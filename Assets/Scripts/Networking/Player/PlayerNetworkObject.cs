@@ -53,7 +53,7 @@ public class PlayerNetworkObject : NetworkBehaviour
         }
         if (IsOwner)
         {
-            BoardSetup.Instance.money = GetMoney();
+            BoardSetup.Instance.money = PlayerMoney.Value;
         }
         else
         {
@@ -66,18 +66,46 @@ public class PlayerNetworkObject : NetworkBehaviour
         // IsServer checks price and sets up sale with timer.
         // IsOwner asks to buy. Makes an rpc request.
         // !IsOwner gets informed of sale.
+        if (IsOwner)
+        {
+            SubmitBuyRequestServerRpc(originX, originY, radX, radY);
+        }
     }
 
+    [Rpc(SendTo.Server)]
+    void SubmitBuyRequestServerRpc(short originX, short originY, short radX, short radY)
+    {
+        BoardSetup.Instance.SelectTiles(originX, originY, radX, radY);
+        int cost = BoardSetup.Instance.GetBuildCost(playerEnum.Value);
+        if (cost <= PlayerMoney.Value)
+        {
+            BoardSetup.Instance.BuySelection(playerEnum.Value);
+            PlayerMoney.Value -= cost;
+        }
+        BoardSetup.Instance.UndoSelection();
+    }
+    
     public void BuyBuildings(short originX, short originY, short radX, short radY)
     {
         // IsServer checks price and sets up sale with timer.
         // IsOwner asks to buy. Mkes an rpc request.
         // !IsOwner gets informed of sale.
-    }
-
-    public int GetMoney()
-    {
-        return PlayerMoney.Value;
+        if (IsOwner)
+        {
+            SubmitBuildRequestServerRpc(originX, originY, radX, radY);
+        }
     }
     
+    [Rpc(SendTo.Server)]
+    void SubmitBuildRequestServerRpc(short originX, short originY, short radX, short radY)
+    {
+        BoardSetup.Instance.SelectTiles(originX, originY, radX, radY);
+        int cost = BoardSetup.Instance.GetBuildCost(playerEnum.Value);
+        if (cost <= PlayerMoney.Value)
+        {
+            BoardSetup.Instance.BuildOnSelection(playerEnum.Value);
+            PlayerMoney.Value -= cost;
+        }
+        BoardSetup.Instance.UndoSelection();
+    }
 }
