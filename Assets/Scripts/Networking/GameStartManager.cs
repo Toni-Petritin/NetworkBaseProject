@@ -3,6 +3,8 @@ using UnityEngine;
 
 public class GameStartManager : MonoBehaviour
 {
+    private static bool readyUIOn = true;
+    
     void OnGUI()
     {
         GUILayout.BeginArea(new Rect(250, 10, 300, 300));
@@ -10,10 +12,10 @@ public class GameStartManager : MonoBehaviour
         {
             StartButtons();
         }
-        else
+        else if (readyUIOn)
         {
             StatusLabels();
-            //StartGame();
+            StartGame();
         }
 
         GUILayout.EndArea();
@@ -53,6 +55,7 @@ public class GameStartManager : MonoBehaviour
                 }
                 if (playersReady)
                 {
+                    readyUIOn = false;
                     foreach (ulong uid in NetworkManager.Singleton.ConnectedClientsIds)
                     {
                         NetworkManager.Singleton.SpawnManager.GetPlayerNetworkObject(uid).GetComponent<PlayerNetworkObject>().ServerStartedGame(playerEnum);

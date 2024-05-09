@@ -276,7 +276,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 306201666}
         m_TargetAssemblyTypeName: BoardSetup, Assembly-CSharp
-        m_MethodName: BuySelection
+        m_MethodName: BuyButton
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -336,7 +336,7 @@ GameObject:
   - component: {fileID: 240858156}
   - component: {fileID: 240858155}
   m_Layer: 5
-  m_Name: VarMoneyText
+  m_Name: CurrMoneyText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -488,9 +488,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   costText: {fileID: 1838469315}
+  currMoneyText: {fileID: 240858155}
   tileObject: {fileID: 871760305640463238, guid: 1ad91164d8c71c2468a1f9ae0eb113be, type: 3}
   selectionList: []
   gameStarted: 1
+  money: 0
+  playerEnum: 0
 --- !u!4 &306201667
 Transform:
   m_ObjectHideFlags: 0
@@ -1439,7 +1442,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 306201666}
         m_TargetAssemblyTypeName: BoardSetup, Assembly-CSharp
-        m_MethodName: BuildOnSelection
+        m_MethodName: BuildButton
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

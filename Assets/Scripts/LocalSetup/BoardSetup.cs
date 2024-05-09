@@ -10,8 +10,9 @@ public class BoardSetup : MonoBehaviour
     private const int width = 100;
     private const int height = 100;
     
-    private int selX = -1, selY = -1, radX = -1, radY = -1;
+    private short selX = -1, selY = -1, radX = -1, radY = -1;
     [SerializeField] private TextMeshProUGUI costText;
+    [SerializeField] private TextMeshProUGUI currMoneyText;
     
     // These exist because CameraLocator-script needs the values and you can't pass
     // a reference to const variables.
@@ -66,6 +67,7 @@ public class BoardSetup : MonoBehaviour
     
     void Update()
     {
+        currMoneyText.text = "" + money;
         
         if (Input.GetMouseButtonDown(0) && gameStarted) // Left mouse button
         {
@@ -79,8 +81,8 @@ public class BoardSetup : MonoBehaviour
                 Tile tile = hit.collider.gameObject.GetComponent<Tile>();
                 
                 SelectTiles(tile.x, tile.y);
-                selX = tile.x;
-                selY = tile.y;
+                selX = (short)tile.x;
+                selY = (short)tile.y;
                 
                 costText.text = "Cost: " + GetSelectionCost(playerEnum);
             }
@@ -213,8 +215,24 @@ public class BoardSetup : MonoBehaviour
         number *= 10;
         return number;
     }
-    // NetworkManager.Singleton.IsClient
-    // var playerObject = NetworkManager.Singleton.SpawnManager.GetLocalPlayerObject();
-    // var player = playerObject.GetComponent<HelloWorldPlayer>();
-    // player.Move();
+
+    public void BuyButton()
+    {
+        if (NetworkManager.Singleton.IsClient)
+        {
+            var playerObject = NetworkManager.Singleton.SpawnManager.GetLocalPlayerObject();
+            var player = playerObject.GetComponent<PlayerNetworkObject>();
+            player.BuyTerritory(selX, selY, radX, radY);
+        }
+    }
+    
+    public void BuildButton()
+    {
+        if (NetworkManager.Singleton.IsClient)
+        {
+            var playerObject = NetworkManager.Singleton.SpawnManager.GetLocalPlayerObject();
+            var player = playerObject.GetComponent<PlayerNetworkObject>();
+            player.BuyBuildings(selX, selY, radX, radY);
+        }
+    }
 }

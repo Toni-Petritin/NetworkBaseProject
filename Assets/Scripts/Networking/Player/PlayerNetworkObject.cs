@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Unity.Netcode;
+using UnityEngine;
 
 public class PlayerNetworkObject : NetworkBehaviour
 {
@@ -9,18 +10,20 @@ public class PlayerNetworkObject : NetworkBehaviour
     private Dictionary<ulong, PlayerEnum> playerColors = new Dictionary<ulong, PlayerEnum>();
 
     public bool playerReadied = false;
+
+    private NetworkVariable<float> timer = new NetworkVariable<float>();
     
-    void Start()
-    {
-        if (IsServer)
-        {
-            // Assign a unique PlayerEnum to each player when they connect
-            // foreach (var player in NetworkManager.Singleton.ConnectedClientsList)
-            // {
-            //     AssignPlayerColor(player.ClientId);
-            // }
-        }
-    }
+    // void Start()
+    // {
+    //     if (IsServer)
+    //     {
+    //         Assign a unique PlayerEnum to each player when they connect
+    //         foreach (var player in NetworkManager.Singleton.ConnectedClientsList)
+    //         {
+    //             AssignPlayerColor(player.ClientId);
+    //         }
+    //     }
+    // }
 
     public void ServerStartedGame(int value)
     {
@@ -49,15 +52,16 @@ public class PlayerNetworkObject : NetworkBehaviour
     {
         if (IsServer)
         {
-            PlayerMoney.Value = 100;
+            timer.Value += Time.deltaTime;
+            if (timer.Value >= 1)
+            {
+                timer.Value = 0;
+                PlayerMoney.Value += 100;
+            }
         }
         if (IsOwner)
         {
             BoardSetup.Instance.money = PlayerMoney.Value;
-        }
-        else
-        {
-            // Get estimate based on own money.
         }
     }
 
@@ -75,6 +79,7 @@ public class PlayerNetworkObject : NetworkBehaviour
     [Rpc(SendTo.Server)]
     void SubmitBuyRequestServerRpc(short originX, short originY, short radX, short radY)
     {
+        BoardSetup.Instance.SetPlayer(playerEnum.Value);
         BoardSetup.Instance.SelectTiles(originX, originY, radX, radY);
         int cost = BoardSetup.Instance.GetBuildCost(playerEnum.Value);
         if (cost <= PlayerMoney.Value)
@@ -83,6 +88,12 @@ public class PlayerNetworkObject : NetworkBehaviour
             PlayerMoney.Value -= cost;
         }
         BoardSetup.Instance.UndoSelection();
+    }
+    
+    [ClientRpc]
+    void SubmitBuyRequestClientRpc(PlayerEnum player, short originX, short originY, short radX, short radY)
+    {
+        
     }
     
     public void BuyBuildings(short originX, short originY, short radX, short radY)
@@ -99,6 +110,7 @@ public class PlayerNetworkObject : NetworkBehaviour
     [Rpc(SendTo.Server)]
     void SubmitBuildRequestServerRpc(short originX, short originY, short radX, short radY)
     {
+        BoardSetup.Instance.SetPlayer(playerEnum.Value);
         BoardSetup.Instance.SelectTiles(originX, originY, radX, radY);
         int cost = BoardSetup.Instance.GetBuildCost(playerEnum.Value);
         if (cost <= PlayerMoney.Value)
@@ -107,5 +119,11 @@ public class PlayerNetworkObject : NetworkBehaviour
             PlayerMoney.Value -= cost;
         }
         BoardSetup.Instance.UndoSelection();
+    }
+
+    [ClientRpc]
+    void SubmitBuildRequestClientRpc(PlayerEnum player, short originX, short originY, short radX, short radY)
+    {
+        
     }
 }
