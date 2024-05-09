@@ -22,9 +22,10 @@ public class PlayerNetworkObject : NetworkBehaviour
         }
     }
 
-    public void ServerStartedGame()
+    public void ServerStartedGame(int value)
     {
         BoardSetup.Instance.gameStarted = true;
+        playerEnum.Value = (PlayerEnum)value;
     }
 
     public void ImReadyToStartGame()
@@ -52,7 +53,7 @@ public class PlayerNetworkObject : NetworkBehaviour
         }
         if (IsOwner)
         {
-            GetMoney();
+            BoardSetup.Instance.money = GetMoney();
         }
         else
         {

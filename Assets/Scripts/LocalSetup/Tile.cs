@@ -19,8 +19,13 @@ public class Tile : MonoBehaviour
         rend = GetComponent<Renderer>();
     }
 
-    public void SetOwner(PlayerEnum value)
+    public int SetOwner(PlayerEnum value)
     {
+        if (value == Owner)
+        {
+            return 0;
+        }
+        
         if (value == PlayerEnum.Neutral)
         {
             rend.material.color = Color.white;
@@ -37,11 +42,16 @@ public class Tile : MonoBehaviour
         {
             rend.material.color = Color.green;
         }
-        
+        return cost;
     }
     
-    public void SetBuilding(bool value)
+    public bool SetBuilding(bool value, PlayerEnum player)
     {
+        if (HasBuilding == value || player != Owner)
+        {
+            return false;
+        }
+        
         if (value)
         {
             cost = 10;
@@ -53,7 +63,7 @@ public class Tile : MonoBehaviour
         
         HasBuilding = value;
         building.SetActive(value);
-        
+        return true;
     }
     
     public void Select(bool selected)

@@ -26,6 +26,8 @@ public class BoardSetup : MonoBehaviour
     public List<Tile> selectionList = new();
 
     public bool gameStarted = true;
+
+    public int money = 0;
     
     private void Awake()
     {
@@ -166,24 +168,26 @@ public class BoardSetup : MonoBehaviour
         return sum;
     }
 
-    public void BuySelection()
+    public int BuySelection(PlayerEnum player)
     {
-        int number = 0;
+        int costSum = 0;
         foreach (Tile tile in selectionList)
         {
-            number++;
+            costSum += tile.SetOwner(player);
         }
-        Debug.Log("Bought " + number + " tiles.");
+
+        return costSum;
     }
 
-    public void BuildOnSelection()
+    public void BuildOnSelection(PlayerEnum player)
     {
         int number = 0;
         foreach (Tile tile in selectionList)
         {
-            tile.SetBuilding(true);
-            number++;
+            if (tile.SetBuilding(true, player))
+            {
+                number++;
+            }
         }
-        Debug.Log("Built on " + number + " tiles.");
     }
 }

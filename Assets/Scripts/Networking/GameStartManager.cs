@@ -42,6 +42,7 @@ public class GameStartManager : MonoBehaviour
             if (NetworkManager.Singleton.IsServer && !NetworkManager.Singleton.IsClient)
             {
                 bool playersReady = true;
+                int playerEnum = 1;
                 foreach (ulong uid in NetworkManager.Singleton.ConnectedClientsIds)
                 {
                     if (!NetworkManager.Singleton.SpawnManager.GetPlayerNetworkObject(uid).GetComponent<PlayerNetworkObject>().playerReadied)
@@ -54,7 +55,8 @@ public class GameStartManager : MonoBehaviour
                 {
                     foreach (ulong uid in NetworkManager.Singleton.ConnectedClientsIds)
                     {
-                        NetworkManager.Singleton.SpawnManager.GetPlayerNetworkObject(uid).GetComponent<PlayerNetworkObject>().ServerStartedGame();
+                        NetworkManager.Singleton.SpawnManager.GetPlayerNetworkObject(uid).GetComponent<PlayerNetworkObject>().ServerStartedGame(playerEnum);
+                        playerEnum++;
                     }
                 }
             }
