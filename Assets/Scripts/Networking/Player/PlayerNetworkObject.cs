@@ -1,13 +1,15 @@
 using System.Collections.Generic;
 using Unity.Netcode;
 
-public class PlayerNetwork : NetworkBehaviour
+public class PlayerNetworkObject : NetworkBehaviour
 {
     public NetworkVariable<int> PlayerMoney = new NetworkVariable<int>();
     public NetworkVariable<PlayerEnum> playerEnum = new NetworkVariable<PlayerEnum>();
 
     private Dictionary<ulong, PlayerEnum> playerColors = new Dictionary<ulong, PlayerEnum>();
 
+    public bool playerReadied = false;
+    
     void Start()
     {
         if (IsServer)
@@ -20,6 +22,16 @@ public class PlayerNetwork : NetworkBehaviour
         }
     }
 
+    public void ServerStartedGame()
+    {
+        BoardSetup.Instance.gameStarted = true;
+    }
+
+    public void ImReadyToStartGame()
+    {
+        playerReadied = true;
+    }
+    
     [ServerRpc(RequireOwnership = false)]
     //private void AssignPlayerColor(ulong clientId)
     public void MyGlobalServerRpc(ServerRpcParams serverRpcParams = default)

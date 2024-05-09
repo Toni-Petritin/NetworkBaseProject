@@ -14,9 +14,9 @@ namespace HelloWorld
             }
             else
             {
-                //StatusLabels();
+                StatusLabels();
 
-                //SubmitNewPosition();
+                SubmitNewPosition();
             }
 
             GUILayout.EndArea();
