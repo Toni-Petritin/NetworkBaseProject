@@ -42,8 +42,18 @@ public class Tile : MonoBehaviour
     
     public void SetBuilding(bool value)
     {
+        if (value)
+        {
+            cost = 10;
+        }
+        else
+        {
+            cost = 1;
+        }
+        
         HasBuilding = value;
-        building.SetActive(building);
+        building.SetActive(value);
+        
     }
     
     public void Select(bool selected)

@@ -1,12 +1,9 @@
-using System.Collections;
-using System.Collections.Generic;
-using System.Net.Security;
 using TMPro;
 using UnityEngine;
 
 public class SelectRaycast : MonoBehaviour
 {
-
+/*
     private int selX = -1, selY = -1, radX = -1, radY = -1;
     [SerializeField] private TextMeshProUGUI textMeshProUGUI;
     
@@ -65,4 +62,5 @@ public class SelectRaycast : MonoBehaviour
             }
         }
     }
+    */
 }

@@ -1,5 +1,7 @@
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 public class BoardSetup : MonoBehaviour
 {
@@ -7,6 +9,9 @@ public class BoardSetup : MonoBehaviour
 
     private const int width = 100;
     private const int height = 100;
+    
+    private int selX = -1, selY = -1, radX = -1, radY = -1;
+    [SerializeField] private TextMeshProUGUI costText;
     
     // These exist because CameraLocator-script needs the values and you can't pass
     // a reference to const variables.
@@ -21,10 +26,10 @@ public class BoardSetup : MonoBehaviour
 
     public List<Tile> selectionList = new();
 
+    public bool gameStarted = true;
+    
     private void Awake()
     {
-        Width = width;
-        Height = height;
         
         if (Instance != null && Instance != this)
         {
@@ -34,6 +39,8 @@ public class BoardSetup : MonoBehaviour
         {
             Instance = this;
         }
+        Width = width;
+        Height = height;
     }
 
     private void Start()
@@ -53,7 +60,63 @@ public class BoardSetup : MonoBehaviour
             }
         }
     }
+    
+    void Update()
+    {
+        
+        if (Input.GetMouseButtonDown(0) && gameStarted) // Left mouse button
+        {
+            // Cast a ray from the mouse position into the scene
+            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+            RaycastHit hit;
 
+            // Check if the ray hits any objects
+            if (Physics.Raycast(ray, out hit))
+            {
+                Tile tile = hit.collider.gameObject.GetComponent<Tile>();
+                
+                SelectTiles(tile.x, tile.y);
+                selX = tile.x;
+                selY = tile.y;
+                
+                costText.text = "Cost: " + GetSelectionCost();
+            }
+            //else
+            //{
+            //    BoardSetup.Instance.UndoSelection();
+            //    selX = -1;
+            //    selY = -1;
+                
+            //    textMeshProUGUI.text = "Cost: " + BoardSetup.Instance.GetSelectionCost();
+            //}
+        }
+        
+        if (Input.GetMouseButtonDown(1) && gameStarted) // Right mouse button
+        {
+            // Cast a ray from the mouse position into the scene
+            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+            RaycastHit hit;
+
+            // Check if the ray hits any objects
+            if (Physics.Raycast(ray, out hit) && selX != -1 && selY != -1)
+            {
+                Tile tile = hit.collider.gameObject.GetComponent<Tile>();
+                
+                SelectTiles(selX, selY, tile.x, tile.y);
+                
+                costText.text = "Cost: " + GetSelectionCost();
+            }
+            else
+            {
+                UndoSelection();
+                selX = -1;
+                selY = -1;
+
+                costText.text = "Cost: " + GetSelectionCost();
+            }
+        }
+    }
+    
     public void SelectTiles(int originX, int originY)
     {
         UndoSelection();
