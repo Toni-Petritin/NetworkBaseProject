@@ -25,7 +25,8 @@ public class BoardSetup : MonoBehaviour
 
     Tile[,] _tiles = new Tile[width, height];
 
-    public List<Tile> selectionList = new();
+    private List<Tile> selectionList = new();
+    private List<Tile> actionSelectionList = new();
 
     public bool gameStarted = true;
 
@@ -135,6 +136,7 @@ public class BoardSetup : MonoBehaviour
         _tiles[originX,originY].Select(true);
     }
     
+    // For normal selection.
     public void SelectTiles(int originX, int originY, int radiusX, int radiusY)
     {
         UndoSelection();
@@ -157,6 +159,7 @@ public class BoardSetup : MonoBehaviour
         }
     }
 
+    // For normal selection.
     public void UndoSelection()
     {
         foreach (Tile tile in selectionList)
@@ -165,11 +168,39 @@ public class BoardSetup : MonoBehaviour
         }
         selectionList.Clear();
     }
+    
+    // For actually buying and building.
+    public void SelectActionTiles(int originX, int originY, int radiusX, int radiusY)
+    {
+        UndoActionSelection();
 
+        int sqrtRadius = (originX - radiusX)*(originX - radiusX) + (originY - radiusY)*(originY - radiusY);
+        float radius = Mathf.Sqrt(sqrtRadius);
+        
+        Debug.Log("Radius: " + radius);
+        for (int x = Mathf.Max(0, originX-(int)radius); x <= Mathf.Min(width - 1, originX + (int)radius); x++)
+        {
+            for (int y = Mathf.Max(0, originY - (int)radius); y <= Mathf.Min(width - 1, originY + (int)radius); y++)
+            {
+                int sqrtDist = (originX - x)*(originX - x) + (originY - y)*(originY - y);
+                if (sqrtRadius >= sqrtDist)
+                {
+                    actionSelectionList.Add(_tiles[x, y]);
+                }
+            }
+        }
+    }
+
+    // For actually buying and building.
+    public void UndoActionSelection()
+    {
+        actionSelectionList.Clear();
+    }
+    
     public int GetSelectionCost(PlayerEnum player)
     {
         int costSum = 0;
-        foreach (Tile tile in selectionList)
+        foreach (Tile tile in actionSelectionList)
         {
             costSum += tile.CostToPlayer(player);
         }
@@ -180,7 +211,7 @@ public class BoardSetup : MonoBehaviour
     public int BuySelection(PlayerEnum player)
     {
         int costSum = 0;
-        foreach (Tile tile in selectionList)
+        foreach (Tile tile in actionSelectionList)
         {
             costSum += tile.SetOwner(player);
         }
@@ -191,7 +222,7 @@ public class BoardSetup : MonoBehaviour
     public int GetBuildCost(PlayerEnum player)
     {
         int number = 0;
-        foreach (Tile tile in selectionList)
+        foreach (Tile tile in actionSelectionList)
         {
             if (tile.IsBuildableForPlayer(player))
             {
@@ -205,7 +236,7 @@ public class BoardSetup : MonoBehaviour
     public int BuildOnSelection(PlayerEnum player)
     {
         int number = 0;
-        foreach (Tile tile in selectionList)
+        foreach (Tile tile in actionSelectionList)
         {
             if (tile.SetBuilding(true, player))
             {

@@ -67,9 +67,6 @@ public class PlayerNetworkObject : NetworkBehaviour
 
     public void BuyTerritory(short originX, short originY, short radX, short radY)
     {
-        // IsServer checks price and sets up sale with timer.
-        // IsOwner asks to buy. Makes an rpc request.
-        // !IsOwner gets informed of sale.
         if (IsOwner)
         {
             SubmitBuyRequestServerRpc(originX, originY, radX, radY);
@@ -79,28 +76,28 @@ public class PlayerNetworkObject : NetworkBehaviour
     [Rpc(SendTo.Server)]
     void SubmitBuyRequestServerRpc(short originX, short originY, short radX, short radY)
     {
-        BoardSetup.Instance.SetPlayer(playerEnum.Value);
-        BoardSetup.Instance.SelectTiles(originX, originY, radX, radY);
+        //BoardSetup.Instance.SetPlayer(playerEnum.Value);
+        BoardSetup.Instance.SelectActionTiles(originX, originY, radX, radY);
         int cost = BoardSetup.Instance.GetBuildCost(playerEnum.Value);
         if (cost <= PlayerMoney.Value)
         {
             BoardSetup.Instance.BuySelection(playerEnum.Value);
             PlayerMoney.Value -= cost;
+            SubmitBuyRequestClientRpc(playerEnum.Value, originX, originY, radX, radY);
         }
-        BoardSetup.Instance.UndoSelection();
+        BoardSetup.Instance.UndoActionSelection();
     }
     
     [ClientRpc]
     void SubmitBuyRequestClientRpc(PlayerEnum player, short originX, short originY, short radX, short radY)
     {
-        
+        BoardSetup.Instance.SelectActionTiles(originX, originY, radX, radY);
+        BoardSetup.Instance.BuySelection(player);
+        BoardSetup.Instance.UndoActionSelection();
     }
     
     public void BuyBuildings(short originX, short originY, short radX, short radY)
     {
-        // IsServer checks price and sets up sale with timer.
-        // IsOwner asks to buy. Mkes an rpc request.
-        // !IsOwner gets informed of sale.
         if (IsOwner)
         {
             SubmitBuildRequestServerRpc(originX, originY, radX, radY);
@@ -110,20 +107,23 @@ public class PlayerNetworkObject : NetworkBehaviour
     [Rpc(SendTo.Server)]
     void SubmitBuildRequestServerRpc(short originX, short originY, short radX, short radY)
     {
-        BoardSetup.Instance.SetPlayer(playerEnum.Value);
-        BoardSetup.Instance.SelectTiles(originX, originY, radX, radY);
+        //BoardSetup.Instance.SetPlayer(playerEnum.Value);
+        BoardSetup.Instance.SelectActionTiles(originX, originY, radX, radY);
         int cost = BoardSetup.Instance.GetBuildCost(playerEnum.Value);
         if (cost <= PlayerMoney.Value)
         {
             BoardSetup.Instance.BuildOnSelection(playerEnum.Value);
             PlayerMoney.Value -= cost;
+            SubmitBuildRequestClientRpc(playerEnum.Value, originX, originY, radX, radY);
         }
-        BoardSetup.Instance.UndoSelection();
+        BoardSetup.Instance.UndoActionSelection();
     }
 
     [ClientRpc]
     void SubmitBuildRequestClientRpc(PlayerEnum player, short originX, short originY, short radX, short radY)
     {
-        
+        BoardSetup.Instance.SelectActionTiles(originX, originY, radX, radY);
+        BoardSetup.Instance.BuildOnSelection(player);
+        BoardSetup.Instance.UndoActionSelection();
     }
 }
