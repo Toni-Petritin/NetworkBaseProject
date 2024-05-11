@@ -9,8 +9,9 @@ public class PlayerNetworkObject : NetworkBehaviour
 
     //private Dictionary<ulong, PlayerEnum> playerColors = new Dictionary<ulong, PlayerEnum>();
 
-    public bool playerReadied = false;
-
+    public NetworkVariable<bool> playerReadied = new NetworkVariable<bool>(false);
+    public NetworkVariable<bool> gameStarted = new NetworkVariable<bool>(false);
+    
     private NetworkVariable<float> timer = new NetworkVariable<float>();
     
     // void Start()
@@ -27,14 +28,32 @@ public class PlayerNetworkObject : NetworkBehaviour
 
     public void ServerStartedGame(int value)
     {
-        BoardSetup.Instance.gameStarted = true;
         playerEnum.Value = (PlayerEnum)value;
-        //BoardSetup.Instance.SetPlayer((PlayerEnum)value);
+        if (IsServer)
+        {
+            gameStarted.Value = true;
+            SubmitStartGameServerRpc(value);
+        }
+    }
+
+    [Rpc(SendTo.NotServer)]
+    void SubmitStartGameServerRpc(int value)
+    {
+        BoardSetup.Instance.gameStarted = true;
     }
     
     public void ImReadyToStartGame()
     {
-        playerReadied = true;
+        if (IsOwner)
+        {
+            SubmitReadyCheckServerRpc();
+        }
+    }
+
+    [Rpc(SendTo.Server)]
+    void SubmitReadyCheckServerRpc()
+    {
+        playerReadied.Value = true;
     }
     
     // [ServerRpc(RequireOwnership = false)]
@@ -51,7 +70,7 @@ public class PlayerNetworkObject : NetworkBehaviour
 
     private void Update()
     {
-        if (IsServer)
+        if (IsServer && gameStarted.Value)
         {
             timer.Value += Time.deltaTime;
             if (timer.Value >= 1)
@@ -62,6 +81,7 @@ public class PlayerNetworkObject : NetworkBehaviour
         }
         if (IsOwner)
         {
+            // This is probably not necessary at this point, but it would be useful if we decided to do interpolation on value.
             BoardSetup.Instance.money = PlayerMoney.Value;
         }
     }

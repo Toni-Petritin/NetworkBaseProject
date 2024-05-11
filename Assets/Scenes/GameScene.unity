@@ -490,9 +490,8 @@ MonoBehaviour:
   costText: {fileID: 1838469315}
   currMoneyText: {fileID: 240858155}
   tileObject: {fileID: 871760305640463238, guid: 1ad91164d8c71c2468a1f9ae0eb113be, type: 3}
-  gameStarted: 1
+  gameStarted: 0
   money: 0
-  playerEnum: 0
 --- !u!4 &306201667
 Transform:
   m_ObjectHideFlags: 0
