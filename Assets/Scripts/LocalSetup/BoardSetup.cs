@@ -3,6 +3,24 @@ using TMPro;
 using Unity.Netcode;
 using UnityEngine;
 
+public struct GameAction
+{
+    public PlayerEnum PEnum;
+    public bool IsBuyAction;
+    public int OriX, OriY, RadX, RadY;
+
+    // Constructor
+    public GameAction(PlayerEnum pEnum, bool isBuyAction, int oriX, int oriY, int radX, int radY)
+    {
+        PEnum = pEnum;
+        IsBuyAction = isBuyAction;
+        OriX = oriX;
+        OriY = oriY;
+        RadX = radX;
+        RadY = radY;
+    }
+}
+
 public class BoardSetup : MonoBehaviour
 {
     public static BoardSetup Instance { get; private set; }
@@ -31,7 +49,11 @@ public class BoardSetup : MonoBehaviour
     public bool gameStarted = false;
 
     public int money = 0;
-    //public PlayerEnum playerEnum;
+    
+    // Check GameAction array. The public ones double as server memory on the server side.
+    public GameAction[] gameActionArray = new GameAction[10000];
+    public int executedIndex = 0;
+    private int latestReceivedIndex = 0;
     
     private void Awake()
     {
@@ -128,11 +150,6 @@ public class BoardSetup : MonoBehaviour
             }
         }
     }
-
-    // public void SetPlayer(PlayerEnum player)
-    // {
-    //     playerEnum = player;
-    // }
     
     public void SelectTiles(int originX, int originY)
     {
@@ -315,5 +332,52 @@ public class BoardSetup : MonoBehaviour
             var player = playerObject.GetComponent<PlayerNetworkObject>();
             player.BuyBuildings(selX, selY, radX, radY);
         }
+    }
+    
+    public void CheckGameActions(int actionIndex, GameAction proposedAction)
+    {
+        // If we for whatever reason receive an older GameAction than one we have performed, we'll just ignore it.
+        if (actionIndex <= executedIndex)
+        {
+            return;
+        }
+        
+        gameActionArray[actionIndex] = proposedAction;
+
+        // If we are up to date, do the GameAction.
+        if (latestReceivedIndex + 1 == actionIndex)
+        {
+            CommitToAction(proposedAction);
+            executedIndex = actionIndex;
+            latestReceivedIndex = actionIndex;
+        }
+        // If the next GameAction is missing (and isn't the one provided now), request it from server.
+        else if (gameActionArray[executedIndex + 1].Equals(default(GameAction)))
+        {
+            var playerObject = NetworkManager.Singleton.SpawnManager.GetLocalPlayerObject();
+            var player = playerObject.GetComponent<PlayerNetworkObject>();
+            player.GetMissingIndexAction(executedIndex + 1);
+        }
+        // If next GameAction exists, but isn't the latest received, we do the GameAction and try to do the next GameAction.
+        else
+        {
+            CommitToAction(gameActionArray[executedIndex + 1]);
+            executedIndex++;
+            CheckGameActions(executedIndex + 1, gameActionArray[executedIndex+1]);
+        }
+    }
+
+    private void CommitToAction(GameAction nextAction)
+    {
+        SelectActionTiles(nextAction.OriX, nextAction.OriY, nextAction.RadX, nextAction.RadY);
+        if (nextAction.IsBuyAction)
+        {
+            BuySelection(nextAction.PEnum);
+        }
+        else
+        {
+            BuildOnSelection(nextAction.PEnum);
+        }
+        UndoActionSelection();
     }
 }

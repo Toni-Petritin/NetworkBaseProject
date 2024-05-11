@@ -7,25 +7,11 @@ public class PlayerNetworkObject : NetworkBehaviour
     public NetworkVariable<int> PlayerMoney = new NetworkVariable<int>();
     public NetworkVariable<PlayerEnum> playerEnum = new NetworkVariable<PlayerEnum>();
 
-    //private Dictionary<ulong, PlayerEnum> playerColors = new Dictionary<ulong, PlayerEnum>();
-
     public NetworkVariable<bool> playerReadied = new NetworkVariable<bool>(false);
     public NetworkVariable<bool> gameStarted = new NetworkVariable<bool>(false);
     
     private NetworkVariable<float> timer = new NetworkVariable<float>();
     
-    // void Start()
-    // {
-    //     if (IsServer)
-    //     {
-    //         Assign a unique PlayerEnum to each player when they connect
-    //         foreach (var player in NetworkManager.Singleton.ConnectedClientsList)
-    //         {
-    //             AssignPlayerColor(player.ClientId);
-    //         }
-    //     }
-    // }
-
     public void ServerStartedGame(int value)
     {
         playerEnum.Value = (PlayerEnum)value;
@@ -56,18 +42,6 @@ public class PlayerNetworkObject : NetworkBehaviour
         playerReadied.Value = true;
     }
     
-    // [ServerRpc(RequireOwnership = false)]
-    // //private void AssignPlayerColor(ulong clientId)
-    // public void MyGlobalServerRpc(ServerRpcParams serverRpcParams = default)
-    // {
-    //     var clientId = serverRpcParams.Receive.SenderClientId;
-    //     if (NetworkManager.ConnectedClients.ContainsKey(clientId))
-    //     {
-    //         var client = NetworkManager.ConnectedClients[clientId];
-    //         // Do things for this client. Like set playerEnum.
-    //     }
-    // }
-
     private void Update()
     {
         if (IsServer && gameStarted.Value)
@@ -104,6 +78,8 @@ public class PlayerNetworkObject : NetworkBehaviour
         {
             BoardSetup.Instance.BuySelection(playerEnum.Value);
             PlayerMoney.Value -= cost;
+            BoardSetup.Instance.gameActionArray[BoardSetup.Instance.executedIndex + 1] = new GameAction(player, true, originX, originY, radX, radY);
+            BoardSetup.Instance.executedIndex++;
             SubmitBuyRequestClientRpc(playerEnum.Value, originX, originY, radX, radY);
         }
         BoardSetup.Instance.UndoActionSelection();
@@ -135,6 +111,8 @@ public class PlayerNetworkObject : NetworkBehaviour
         {
             BoardSetup.Instance.BuildOnSelection(player);
             PlayerMoney.Value -= cost;
+            BoardSetup.Instance.gameActionArray[BoardSetup.Instance.executedIndex + 1] = new GameAction(player, false, originX, originY, radX, radY);
+            BoardSetup.Instance.executedIndex++;
             SubmitBuildRequestClientRpc(player, originX, originY, radX, radY);
         }
         BoardSetup.Instance.UndoActionSelection();
@@ -146,5 +124,19 @@ public class PlayerNetworkObject : NetworkBehaviour
         BoardSetup.Instance.SelectActionTiles(originX, originY, radX, radY);
         BoardSetup.Instance.BuildOnSelection(player);
         BoardSetup.Instance.UndoActionSelection();
+    }
+
+    public void GetMissingIndexAction(int index)
+    {
+        if (IsOwner)
+        {
+            SubmitIndexServerRpc(index);
+        }
+    }
+
+    [Rpc(SendTo.Server)] 
+    void SubmitIndexServerRpc(int index)
+    {
+        GameAction requestedAction = BoardSetup.Instance.gameActionArray[index];
     }
 }

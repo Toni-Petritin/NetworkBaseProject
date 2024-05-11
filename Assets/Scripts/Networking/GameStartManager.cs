@@ -75,12 +75,6 @@ public class GameStartManager : MonoBehaviour
                         playerEnum++;
                     }
                 }
-                // readyUIOn = false;
-                // foreach (ulong uid in NetworkManager.Singleton.ConnectedClientsIds)
-                // {
-                //     NetworkManager.Singleton.SpawnManager.GetPlayerNetworkObject(uid).GetComponent<PlayerNetworkObject>().ServerStartedGame(playerEnum);
-                //     playerEnum++;
-                // }
             }
             else
             {
