@@ -492,6 +492,7 @@ MonoBehaviour:
   tileObject: {fileID: 871760305640463238, guid: 1ad91164d8c71c2468a1f9ae0eb113be, type: 3}
   gameStarted: 0
   money: 0
+  executedIndex: 0
 --- !u!4 &306201667
 Transform:
   m_ObjectHideFlags: 0
@@ -882,9 +883,9 @@ MonoBehaviour:
     Port: 7777
     ServerListenAddress: 0.0.0.0
   DebugSimulator:
-    PacketDelayMS: 0
-    PacketJitterMS: 0
-    PacketDropRate: 0
+    PacketDelayMS: 200
+    PacketJitterMS: 100
+    PacketDropRate: 10
 --- !u!114 &1167128126
 MonoBehaviour:
   m_ObjectHideFlags: 0
